@@ -1,8 +1,10 @@
 export const DREAM_STYLES = [
-  { value: "realistic", label: "Realistic" },
-  { value: "watercolor", label: "Watercolor" },
-  { value: "sketch", label: "Sketch" },
-  { value: "surreal", label: "Surreal" },
+  "realistic", 
+  "sketch",
+  "watercolor", 
+  "surreal",
+  "psychedelic",
+  "cosmic",
 ];
 
 export const COMMON_TAGS = [

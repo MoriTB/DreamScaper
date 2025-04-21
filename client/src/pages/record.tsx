@@ -1,31 +1,18 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/lib/AuthProvider";
 import { useLocation } from "wouter";
 import { useWebSocket } from "@/lib/useWebSocket";
-import { RecordDreamSection } from "@/organisms/RecordDreamSection";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { RecordDreamSectionNew } from "@/organisms/RecordDreamSectionNew";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useQuery } from "@tanstack/react-query";
 import { AlertCircle, CheckCircle } from "lucide-react";
 
 export default function Record() {
   const { user } = useAuth();
   const [location, navigate] = useLocation();
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState<"voice" | "text">("voice");
   const [justCreatedDreamId, setJustCreatedDreamId] = useState<number | null>(null);
-  
-  // Check if mode is specified in URL
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const mode = params.get("mode");
-    if (mode === "text") {
-      setActiveTab("text");
-    }
-  }, []);
   
   // If not logged in, redirect to login
   useEffect(() => {
@@ -48,7 +35,7 @@ export default function Record() {
           title: "Image Generated",
           description: "An image for your dream has been created!",
           action: (
-            <a href={`/dreams/${data.dreamId}`} className="bg-purple-600 px-3 py-1 rounded-md text-white text-xs">
+            <a href={`/dreams/${data.dreamId}`} className="bg-gradient-to-r from-purple-600 to-indigo-600 px-3 py-1 rounded-md text-white text-xs">
               View
             </a>
           )
@@ -61,13 +48,8 @@ export default function Record() {
     navigate("/");
   };
   
-  const handleSuccess = (dreamId: number) => {
-    setJustCreatedDreamId(dreamId);
-    
-    toast({
-      title: "Dream Recorded",
-      description: "Your dream has been saved and is being processed.",
-    });
+  const handleSuccess = (dreamId?: number) => {
+    if (dreamId) setJustCreatedDreamId(dreamId);
     
     // Go to dashboard
     navigate("/");
@@ -81,35 +63,19 @@ export default function Record() {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
-      className="max-w-5xl mx-auto"
+      className="max-w-5xl mx-auto px-4 pt-2 pb-10"
     >
-      <h1 className="text-2xl font-semibold mb-6">Record a New Dream</h1>
-      
       {!isConnected && (
-        <Alert variant="warning" className="mb-6">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Notification Status</AlertTitle>
+        <Alert variant="warning" className="mb-6 bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800/50">
+          <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-500" />
+          <AlertTitle>Connection Status</AlertTitle>
           <AlertDescription>
-            Real-time notifications are not connected. You may need to refresh the page to see updates.
+            Real-time notifications are not connected. Updates may be delayed.
           </AlertDescription>
         </Alert>
       )}
       
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>Dream Recording Tips</CardTitle>
-        </CardHeader>
-        <CardContent className="prose dark:prose-invert">
-          <ul>
-            <li>Speak clearly and naturally when recording your dream.</li>
-            <li>Include as many details as you can remember - colors, feelings, places, people.</li>
-            <li>Tag your dream to help identify patterns over time.</li>
-            <li>If you recall your dream later, you can always edit it to add more details.</li>
-          </ul>
-        </CardContent>
-      </Card>
-      
-      <RecordDreamSection
+      <RecordDreamSectionNew
         userId={user.id}
         onCancel={handleCancel}
         onSuccess={handleSuccess}

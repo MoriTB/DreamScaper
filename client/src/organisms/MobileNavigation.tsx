@@ -1,7 +1,6 @@
-import { MOBILE_NAV_ITEMS } from "@/lib/constants";
+import { Home, Archive, PlusCircle, BarChart2, User } from "lucide-react";
 import { useLocation, Link } from "wouter";
 import { cn } from "@/lib/utils";
-import { PlusIcon } from "lucide-react";
 
 interface MobileNavigationProps {
   onAddClick?: () => void;
@@ -9,46 +8,47 @@ interface MobileNavigationProps {
 
 export function MobileNavigation({ onAddClick }: MobileNavigationProps) {
   const [location] = useLocation();
+  
+  // Define nav items directly in the component for more control
+  const NAV_ITEMS = [
+    { label: "Home", icon: Home, path: "/" },
+    { label: "Dreams", icon: Archive, path: "/all-dreams" },
+    { label: "Record", icon: PlusCircle, path: "/record", isAction: true },
+    { label: "Insights", icon: BarChart2, path: "/insights" },
+    { label: "Profile", icon: User, path: "/profile" },
+  ];
 
   return (
-    <nav className="md:hidden fixed bottom-0 inset-x-0 glass dark:glass-dark border-t border-neutral-200 dark:border-neutral-700 z-10">
-      <div className="flex justify-around">
-        {MOBILE_NAV_ITEMS.map((item, index) => {
+    <nav className="md:hidden fixed bottom-0 inset-x-0 glass dark:glass-dark border-t border-neutral-200 dark:border-neutral-700 z-50">
+      <div className="flex items-center justify-between px-3 py-2">
+        {NAV_ITEMS.map((item, index) => {
           const isActive = location === item.path;
+          const Icon = item.icon;
           
           if (item.isAction) {
             return (
-              <button
-                key={index}
-                className="flex-1 flex flex-col items-center py-2 relative"
-                onClick={onAddClick}
-              >
-                <div className="w-12 h-12 rounded-full bg-purple-600 flex items-center justify-center text-white absolute -top-6 shadow-lg">
-                  <PlusIcon className="h-6 w-6" />
-                </div>
-                <span className="text-xs mt-7 text-neutral-500 dark:text-neutral-400">
-                  {item.label}
-                </span>
-              </button>
+              <Link href={item.path} key={index}>
+                <a className="relative flex flex-col items-center justify-center">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 flex items-center justify-center text-white shadow-lg">
+                    <Icon size={24} />
+                  </div>
+                </a>
+              </Link>
             );
           }
           
           return (
             <Link href={item.path} key={index}>
-              <a className="flex-1 flex flex-col items-center py-3">
-                <i className={cn(
-                  item.icon,
-                  "text-xl",
-                  isActive
-                    ? "text-purple-600 dark:text-purple-400"
-                    : "text-neutral-500 dark:text-neutral-400"
-                )}></i>
-                <span className={cn(
-                  "text-xs mt-1",
-                  isActive
-                    ? "text-purple-600 dark:text-purple-400"
-                    : "text-neutral-500 dark:text-neutral-400"
-                )}>
+              <a className={cn(
+                "w-16 flex flex-col items-center py-1 transition-colors",
+                isActive 
+                  ? "text-purple-600 dark:text-purple-400" 
+                  : "text-neutral-500 dark:text-neutral-400 hover:text-purple-500 dark:hover:text-purple-300"
+              )}>
+                <Icon size={20} className={cn(
+                  isActive && "animate-pulse"
+                )} />
+                <span className="text-xs mt-1 font-medium">
                   {item.label}
                 </span>
               </a>

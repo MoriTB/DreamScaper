@@ -46,10 +46,8 @@ export function Header({
     >
       <div className="max-w-7xl mx-auto px-4 flex justify-between items-center h-16">
         <div className="flex items-center">
-          <Link href="/">
-            <a className="text-xl font-semibold text-purple-600 dark:text-purple-400">
-              Dreamscape
-            </a>
+          <Link href="/" className="text-xl font-semibold text-purple-600 dark:text-purple-400">
+            Dreamscape
           </Link>
         </div>
         
