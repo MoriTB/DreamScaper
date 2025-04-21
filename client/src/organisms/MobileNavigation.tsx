@@ -1,8 +1,9 @@
-import { Home, Archive, PlusCircle, BarChart2, User, Moon } from "lucide-react";
+import { Home, Archive, PlusCircle, Heart, SmilePlus, Moon } from "lucide-react";
 import { useLocation, Link } from "wouter";
 import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { MOBILE_NAV_ITEMS } from "@/lib/constants";
 
 interface MobileNavigationProps {
   onAddClick?: () => void;
@@ -14,13 +15,13 @@ export function MobileNavigation({ onAddClick }: MobileNavigationProps) {
   const lastScrollY = useRef(0);
   const ticking = useRef(false);
   
-  // Define nav items directly in the component for more control
+  // Define nav items with Lucide icons
   const NAV_ITEMS = [
     { label: "Home", icon: Home, path: "/" },
     { label: "Dreams", icon: Archive, path: "/all-dreams" },
     { label: "Record", icon: PlusCircle, path: "/record", isAction: true },
-    { label: "Insights", icon: BarChart2, path: "/insights" },
-    { label: "Profile", icon: User, path: "/profile" },
+    { label: "Favorites", icon: Heart, path: "/favorites" },
+    { label: "Mood", icon: SmilePlus, path: "/mood-tracker" },
   ];
   
   // Optimized smooth scroll detection

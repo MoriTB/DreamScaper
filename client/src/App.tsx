@@ -16,6 +16,8 @@ import Record from "@/pages/record";
 import Login from "@/pages/login";
 import Register from "@/pages/register";
 import NotFound from "@/pages/not-found";
+import Favorites from "@/pages/favorites";
+import MoodTracker from "@/pages/mood-tracker";
 
 // Layout
 import { Layout } from "@/components/layout";
@@ -54,6 +56,18 @@ function Router() {
         <Route path="/record">
           <Layout>
             <Record />
+          </Layout>
+        </Route>
+        
+        <Route path="/favorites">
+          <Layout>
+            <Favorites />
+          </Layout>
+        </Route>
+        
+        <Route path="/mood-tracker">
+          <Layout>
+            <MoodTracker />
           </Layout>
         </Route>
         

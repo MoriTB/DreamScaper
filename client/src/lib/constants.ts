@@ -41,15 +41,15 @@ export const NAV_ITEMS = [
     items: [
       { label: "Dashboard", icon: "ri-home-5-line", path: "/" },
       { label: "All Dreams", icon: "ri-archive-line", path: "/all-dreams" },
-      { label: "Favorites", icon: "ri-star-line", path: "/favorites" },
-      { label: "Mood Tracker", icon: "ri-emotion-line", path: "/mood" },
+      { label: "Favorites", icon: "ri-heart-line", path: "/favorites" },
+      { label: "Mood Tracker", icon: "ri-emotion-line", path: "/mood-tracker" },
     ],
   },
   {
     section: "Analysis",
     items: [
       { label: "Insights", icon: "ri-bar-chart-box-line", path: "/insights" },
-      { label: "Patterns", icon: "ri-calendar-line", path: "/patterns" },
+      { label: "Profile", icon: "ri-user-line", path: "/profile" },
     ],
   },
 ];
@@ -58,6 +58,6 @@ export const MOBILE_NAV_ITEMS = [
   { label: "Home", icon: "ri-home-5-line", path: "/" },
   { label: "Dreams", icon: "ri-archive-line", path: "/all-dreams" },
   { label: "Record", icon: "ri-add-line", path: "/record", isAction: true },
-  { label: "Insights", icon: "ri-bar-chart-line", path: "/insights" },
-  { label: "Profile", icon: "ri-user-line", path: "/profile" },
+  { label: "Favorites", icon: "ri-heart-line", path: "/favorites" },
+  { label: "Mood", icon: "ri-emotion-line", path: "/mood-tracker" },
 ];
