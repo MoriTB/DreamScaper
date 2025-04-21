@@ -1,0 +1,82 @@
+You are a senior full‑stack engineer and product designer.
+
+Context
+-------
+• I have uploaded **voice-driven-main.zip**.  
+• It currently holds a basic React front‑end for a voice‑driven dream‑journal idea, but the code is unfinished, buggy, and has NO back‑end.  
+• Tech preferences: React 18 + TypeScript + Vite, Tailwind CSS, Framer‑Motion for animations, Node.js 20 + Express + Prisma + PostgreSQL on the server.  
+• Target devices: mobile‑first but fully responsive (≥ 375 px → 1440 px).  
+• Branding: soft non‑neon purples & warm neutrals, rounded corners (1 rem), subtle glass‑morphism cards.
+
+Your Mission
+------------
+**1. Diagnose & Plan**  
+   ▸ Unzip the project, run `npm i`, note every error/warning.  
+   ▸ Produce a 3‑level task list: _High‑level goals → Epics → Atomic tasks_.
+
+**2. Front‑End Upgrade**  
+   A. **Core Refactor**  
+      • Convert all `.js` files to strict `.tsx`, enable `"strict": true` in `tsconfig.json`.  
+      • Move to an **atomic design** folder layout (`/atoms`, `/molecules`, `/organisms`, `/pages`).  
+      • Replace inline styles with **Tailwind** utility classes; keep **className** strings under 120 chars (extract with `clsx` as needed).  
+   B. **UI / UX Polish**  
+      • Global theme: typography scale 1.25 (16 → 20 → 25 → 31 → 39), colour tokens in `tailwind.config.ts`.  
+      • Add dark‑mode toggle via `useMediaQuery('(prefers-color-scheme: dark)')`.  
+      • Navigation: bottom tab bar on mobile, left rail on ≥ md.  
+      • All forms fully keyboard‑navigable, ARIA labelled, WCAG AA contrast.  
+   C. **Motion & Delight**  
+      • Use **Framer‑Motion** `AnimatePresence` for route transitions (fade‑in/slide‑up 300 ms).  
+      • Micro‑interactions: haptic‑like scale on tap/drag, staggered list reveals.  
+      • Skeleton loaders (`react-content-loader`) for async screens.  
+   D. **Progressive Web App**  
+      • Add `manifest.webmanifest`, `service-worker.ts` (Vite PWA plugin) for offline viewing of saved dreams.  
+      • Prompt “Add to Home Screen” politely after second visit.
+
+**3. Back‑End Build**  
+   A. **Project Setup**  
+      • In `/server`, init `npm` workspace with Node 20, TypeScript, ESLint, Prettier.  
+      • DB: PostgreSQL 15, schema managed via **Prisma**.  
+      • Env config via `dotenv`, validated with `zod`.  
+   B. **Core Features**  
+      • **Auth**: email + password, bcrypt 12 rounds, JWT access + refresh, secure cookies, password‑reset email stub.  
+      • **Dream CRUD**: `POST /dreams` (text + optional audio file), `GET /dreams`, `PATCH /dreams/:id`, `DELETE /dreams/:id`.  
+      • **Transcription**: accept `.wav`/`.m4a`, send to OpenAI Whisper API, store transcript.  
+      • **Interpretation**: call ChatGPT 4o with a symbolic‑analysis prompt, cache response.  
+      • **Image Gen Queue**: enqueue user‑selected style (`sketch|watercolor|surreal`) → call DALL·E 3, store `image_url`.  
+      • **WebSockets** (Socket.IO) to emit `transcriptionComplete`, `interpretationComplete`, `imageReady`.  
+   C. **Validation & Security**  
+      • Each route guarded by middleware: rate‑limit (`express-rate-limit`), input validation (**zod**), error handler.  
+      • Helmet headers, CORS configured for `https://dream‑journal.app`.  
+   D. **Testing**  
+      • Unit tests: Jest + ts‑jest for utils/services (≥ 80 % coverage).  
+      • Integration tests: Supertest for routes, mocked DB via `@prisma/client` + `ts‑mockito`.  
+      • E2E smoke: Playwright script that signs up, records a dummy dream, waits for image.
+
+**4. Dev‑Ops & Quality Gates**  
+   • **Docker**: multistage build (`node:20‑alpine`), health‑check endpoint `/healthz`.  
+   • `docker‑compose.yml` spins up `server`, `client`, `postgres`, `minio` (for S3‑compatible uploads).  
+   • GitHub Actions:  
+     – lint / type‑check → test → build.  
+     – Deploy to Fly.io on `main`, render OTel traces to Grafana.  
+   • Pre‑commit Husky hooks: `lint-staged`, `npm run format`.
+
+**5. Documentation**  
+   • Autogenerate Postman collection & OpenAPI 3 yaml.  
+   • Update `README.md` with setup, .env samples, `make dev`, `make prod`, API examples, ER‑diagram.  
+   • Add `CONTRIBUTING.md` with commit‑msg convention (Conventional Commits).
+
+Deliverables
+------------
+1. **Refactored `/client`** and new **`/server`** directories, fully typed, passing `npm run test`.  
+2. **PostgreSQL migration** file(s) and **seed script** (`npm run seed`) creating a demo user with two dreams.  
+3. **CI badge** and **deployment URL** (Fly.io preview) in README.  
+4. A concise **CHANGELOG.md** (keep/unkeep sections).  
+
+Execution Rules
+---------------
+• Modify existing code instead of rewriting unless necessary.  
+• Keep commit history clean and logical (squashable per feature).  
+• Prioritize accessibility and performance (Lighthouse ≥ 95 avg).  
+• Comment clearly but avoid redundant comments; self‑documenting code first.  
+
+Begin by printing a TODO‑style roadmap summarizing the tasks above, then implement.
