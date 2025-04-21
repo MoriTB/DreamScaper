@@ -18,9 +18,14 @@ export async function transcribeAudio(filePath: string): Promise<{ text: string,
       model: "whisper-1",
     });
     
+    // Get audio duration from file using ffprobe or another method
+    // For now, estimate duration (1 word ≈ 0.3-0.5 seconds)
+    const words = transcription.text.split(' ').length;
+    const estimatedDuration = Math.max(1, Math.round(words * 0.4)); // at least 1 second
+    
     return {
       text: transcription.text,
-      duration: transcription.duration || 0,
+      duration: estimatedDuration,
     };
   } catch (error) {
     log(`Error transcribing audio: ${(error as Error).message}`, 'openai');
@@ -40,6 +45,9 @@ export async function interpretDream(dreamText: string): Promise<{
   }
 }> {
   try {
+    // Ensure dreamText is not null or undefined
+    const safeText = dreamText || "I had a dream but don't remember the details";
+    
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
@@ -55,13 +63,15 @@ export async function interpretDream(dreamText: string): Promise<{
         },
         {
           role: "user",
-          content: dreamText
+          content: safeText
         }
       ],
       response_format: { type: "json_object" }
     });
 
-    const result = JSON.parse(response.choices[0].message.content);
+    // Safely handle response content
+    const content = response.choices[0]?.message?.content || '{"interpretation":"Unable to interpret dream","insights":{"symbols":[],"emotions":[],"themes":[]}}';
+    const result = JSON.parse(content);
     
     return {
       interpretation: result.interpretation,
@@ -82,9 +92,13 @@ export async function interpretDream(dreamText: string): Promise<{
  */
 export async function generateDreamImage(dreamText: string, style: string = "realistic"): Promise<string> {
   try {
+    // Ensure dreamText is not null or undefined
+    const safeText = dreamText || "A mysterious dreamscape with abstract elements";
+    const safeStyle = style || "realistic";
+    
     // Create style-specific prompt
     let stylePrompt;
-    switch (style) {
+    switch (safeStyle) {
       case "sketch":
         stylePrompt = "Create a detailed pencil sketch drawing depicting this dream scene. Use clean lines, subtle shading, and a hand-drawn quality with clear focus on the main elements:";
         break;
@@ -104,7 +118,7 @@ export async function generateDreamImage(dreamText: string, style: string = "rea
         stylePrompt = "Create a detailed, realistic visualization of this dream scene with natural lighting, accurate proportions, and photorealistic details:";
     }
     
-    const fullPrompt = `${stylePrompt} ${dreamText}\n\nEnsure the image captures the emotional essence and symbolism of the dream. Focus on creating a compelling visual narrative that evokes the mood described. Do not include any text in the image.`;
+    const fullPrompt = `${stylePrompt} ${safeText}\n\nEnsure the image captures the emotional essence and symbolism of the dream. Focus on creating a compelling visual narrative that evokes the mood described. Do not include any text in the image.`;
     
     const response = await openai.images.generate({
       model: "dall-e-3",
@@ -114,7 +128,15 @@ export async function generateDreamImage(dreamText: string, style: string = "rea
       quality: "standard",
     });
 
-    return response.data[0].url;
+    // Safely handle the URL
+    const imageUrl = response.data[0]?.url || "";
+    if (!imageUrl) {
+      log("Warning: OpenAI returned empty image URL", 'openai');
+      // Return a default placeholder image URL if needed
+      return "https://placehold.co/1024x1024/3730a3/ffffff?text=Dream+Visualization+Unavailable";
+    }
+
+    return imageUrl;
   } catch (error) {
     log(`Error generating dream image: ${(error as Error).message}`, 'openai');
     throw new Error(`Failed to generate dream image: ${(error as Error).message}`);

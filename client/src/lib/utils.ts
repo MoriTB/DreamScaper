@@ -150,7 +150,8 @@ export function createBlurredBackground(container: HTMLElement, content: HTMLEle
 export function applyGlassMorphism(element: HTMLElement): void {
   element.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
   element.style.backdropFilter = 'blur(10px)';
-  element.style.WebkitBackdropFilter = 'blur(10px)';
+  // Apply webkit prefix with type assertion
+  (element.style as any).webkitBackdropFilter = 'blur(10px)';
   element.style.borderRadius = '10px';
   element.style.border = '1px solid rgba(255, 255, 255, 0.1)';
   element.style.boxShadow = '0 4px 30px rgba(0, 0, 0, 0.1)';
