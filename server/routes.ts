@@ -153,9 +153,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Dream CRUD routes
   app.post('/api/dreams', upload.single('audio'), async (req: Request, res: Response) => {
     try {
-      const { title, content, userId, tags } = req.body;
-      
-      const parsedTags = tags ? JSON.parse(tags) : [];
+      const { title, content, userId, style, dreamDate } = req.body;
       
       let audioUrl = null;
       let audioDuration = null;
@@ -175,14 +173,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
         audioDuration = Math.round(transcription.duration);
       }
       
-      // Validate and create dream
+      // Generate AI title if none provided or is date-based default
+      let dreamTitle = title;
+      if (!dreamTitle || dreamTitle.startsWith('Dream on ')) {
+        try {
+          // Extract a title from the content - later this will call AI
+          const words = finalContent.split(' ');
+          const titleLength = Math.min(5, words.length);
+          dreamTitle = words.slice(0, titleLength).join(' ') + '...';
+          
+          // In a real implementation, we'd call OpenAI to generate a title:
+          // const titleResponse = await openai.chat.completions.create({
+          //   model: "gpt-4o",
+          //   messages: [
+          //     { role: "system", content: "Generate a short, evocative title for this dream:" },
+          //     { role: "user", content: finalContent }
+          //   ],
+          //   max_tokens: 25
+          // });
+          // dreamTitle = titleResponse.choices[0].message.content.trim();
+        } catch (err) {
+          log(`Error generating dream title: ${(err as Error).message}`, 'routes');
+          dreamTitle = title || 'Untitled Dream';
+        }
+      }
+      
+      // Generate tags from content
+      let dreamTags: string[] = [];
+      try {
+        // In a real implementation, we'd call OpenAI to generate relevant tags:
+        // For now, extract some likely tags based on content
+        const commonThemes = [
+          'flying', 'falling', 'chase', 'water', 'family', 'lost', 
+          'animals', 'school', 'work', 'test', 'nightmare'
+        ];
+        
+        dreamTags = commonThemes.filter(theme => 
+          finalContent.toLowerCase().includes(theme.toLowerCase())
+        );
+        
+        // If no tags found, add a default one
+        if (dreamTags.length === 0) {
+          dreamTags = ['miscellaneous'];
+        }
+      } catch (err) {
+        log(`Error generating dream tags: ${(err as Error).message}`, 'routes');
+        dreamTags = ['uncategorized'];
+      }
+      
+      // Validate and create dream with the parsed date or current date
+      let dreamDateTime: Date;
+      try {
+        dreamDateTime = dreamDate ? new Date(dreamDate) : new Date();
+      } catch (err) {
+        dreamDateTime = new Date();
+      }
+      
       const dreamData = {
-        title,
+        title: dreamTitle,
         content: finalContent,
         userId: parseInt(userId, 10),
         audioUrl,
         audioDuration,
-        tags: parsedTags,
+        tags: dreamTags,
+        createdAt: dreamDateTime,
+        isFavorite: false
       };
       
       const dream = await storage.createDream(dreamData);
@@ -202,19 +257,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
             interpretation: newInterpretation
           });
           
-          // After interpretation, generate image
+          // After interpretation, generate image using selected style
           setTimeout(async () => {
             try {
-              const imageStyle = parsedTags.includes('surreal') ? 'surreal' : 
-                                parsedTags.includes('watercolor') ? 'watercolor' : 
-                                parsedTags.includes('sketch') ? 'sketch' : 'realistic';
+              const selectedStyle = style || 'realistic';
               
-              const imageUrl = await generateDreamImage(finalContent, imageStyle);
+              const imageUrl = await generateDreamImage(finalContent, selectedStyle);
               
               const newImageGeneration = await storage.createImageGeneration({
                 dreamId: dream.id,
                 imageUrl,
-                style: imageStyle,
+                style: selectedStyle,
                 prompt: finalContent,
               });
               

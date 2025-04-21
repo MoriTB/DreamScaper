@@ -66,7 +66,7 @@ export default function Record() {
       className="max-w-5xl mx-auto px-4 pt-2 pb-10"
     >
       {!isConnected && (
-        <Alert variant="warning" className="mb-6 bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800/50">
+        <Alert className="mb-6 bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800/50">
           <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-500" />
           <AlertTitle>Connection Status</AlertTitle>
           <AlertDescription>

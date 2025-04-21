@@ -86,19 +86,25 @@ export async function generateDreamImage(dreamText: string, style: string = "rea
     let stylePrompt;
     switch (style) {
       case "sketch":
-        stylePrompt = "Create a detailed pencil sketch drawing depicting this dream scene:";
+        stylePrompt = "Create a detailed pencil sketch drawing depicting this dream scene. Use clean lines, subtle shading, and a hand-drawn quality with clear focus on the main elements:";
         break;
       case "watercolor":
-        stylePrompt = "Create a soft, ethereal watercolor painting depicting this dream scene:";
+        stylePrompt = "Create a soft, ethereal watercolor painting depicting this dream scene with gentle color blending, flowing transitions, and slightly blurred edges:";
         break;
       case "surreal":
-        stylePrompt = "Create a surrealist, Dalí-inspired dreamscape depicting this scene:";
+        stylePrompt = "Create a surrealist, Dalí-inspired dreamscape depicting this scene with impossible physics, distorted perspectives, and symbolic juxtapositions:";
+        break;
+      case "psychedelic":
+        stylePrompt = "Create a vibrant, psychedelic visualization of this dream with fractals, intense saturated colors, swirling patterns, and visual distortions reminiscent of altered states of consciousness:";
+        break;
+      case "cosmic":
+        stylePrompt = "Create a cosmic, space-inspired visualization of this dream with celestial elements, stars, nebulae, and cosmic energy fields, creating a sense of infinite possibility and transcendence:";
         break;
       default:
-        stylePrompt = "Create a detailed, realistic visualization of this dream scene:";
+        stylePrompt = "Create a detailed, realistic visualization of this dream scene with natural lighting, accurate proportions, and photorealistic details:";
     }
     
-    const fullPrompt = `${stylePrompt} ${dreamText}\n\nEnsure the image has a dreamy, ethereal quality with soft lighting and subtle colors. Focus on symbolic elements, mystical atmosphere, and emotional resonance. Do not include any text in the image.`;
+    const fullPrompt = `${stylePrompt} ${dreamText}\n\nEnsure the image captures the emotional essence and symbolism of the dream. Focus on creating a compelling visual narrative that evokes the mood described. Do not include any text in the image.`;
     
     const response = await openai.images.generate({
       model: "dall-e-3",
