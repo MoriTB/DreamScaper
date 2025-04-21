@@ -23,38 +23,94 @@ export function MobileNavigation({ onAddClick }: MobileNavigationProps) {
     { label: "Profile", icon: User, path: "/profile" },
   ];
   
-  // Smooth scroll detection with direction detection
+  // Optimized smooth scroll detection
   useEffect(() => {
+    let lastScrollY = window.scrollY;
+    let scrollTimer: number | null = null;
+    let isScrolling = false;
+    
     const handleScroll = () => {
-      if (!ticking.current) {
-        window.requestAnimationFrame(() => {
-          const currentScrollY = window.scrollY;
-          
-          // Don't hide when near top of page
-          if (currentScrollY < 150) {
-            setHidden(false);
-          } 
-          // Handle scroll direction
-          else if (currentScrollY > lastScrollY.current + 25) {
-            // Scrolling down - hide nav
-            setHidden(true);
-          } else if (currentScrollY < lastScrollY.current - 25) {
-            // Scrolling up - show nav
-            setHidden(false);
-          }
-          
-          lastScrollY.current = currentScrollY;
-          ticking.current = false;
-        });
+      const currentScrollY = window.scrollY;
+      isScrolling = true;
+      
+      // At bottom of page, always show the nav regardless of direction
+      if ((window.innerHeight + currentScrollY) >= document.body.offsetHeight - 60) {
+        if (scrollTimer) clearTimeout(scrollTimer);
+        setHidden(false);
+        lastScrollY = currentScrollY;
+        return;
+      }
+      
+      // At top of page, always show the nav
+      if (currentScrollY < 100) {
+        if (scrollTimer) clearTimeout(scrollTimer);
+        setHidden(false);
+        lastScrollY = currentScrollY;
+        return;
+      }
+      
+      // Real-time direction detection with small threshold
+      const delta = currentScrollY - lastScrollY;
+      
+      // Ignore very small movements to prevent jumpy behavior
+      if (Math.abs(delta) < 10) {
+        lastScrollY = currentScrollY;
+        return;
+      }
+      
+      // Scrolling down - hide nav after a short delay
+      if (delta > 0) {
+        if (scrollTimer) clearTimeout(scrollTimer);
         
-        ticking.current = true;
+        // Wait briefly before hiding to avoid jumpy behavior during momentum scrolling
+        scrollTimer = window.setTimeout(() => {
+          setHidden(true);
+        }, 150);
+      } 
+      // Scrolling up - show nav immediately for responsive feel
+      else if (delta < 0) {
+        if (scrollTimer) clearTimeout(scrollTimer);
+        setHidden(false);
+      }
+      
+      // Update last position
+      lastScrollY = currentScrollY;
+    };
+    
+    // Use passive event for better performance
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    // Add touchmove handler for better mobile experience
+    const handleTouchMove = () => {
+      isScrolling = true;
+    };
+    
+    window.addEventListener('touchmove', handleTouchMove, { passive: true });
+    
+    // Add end of scroll detection to ensure nav is visible when scrolling stops
+    const handleScrollEnd = () => {
+      if (isScrolling) {
+        isScrolling = false;
+        
+        // If user is near bottom or scrolling up when stopping, ensure nav is visible
+        if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 100 ||
+            window.scrollY < lastScrollY) {
+          setHidden(false);
+        }
       }
     };
     
-    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('touchend', handleScrollEnd, { passive: true });
+    window.addEventListener('scroll', () => {
+      if (scrollTimer) clearTimeout(scrollTimer);
+      scrollTimer = window.setTimeout(handleScrollEnd, 150);
+    }, { passive: true });
     
     return () => {
       window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleScrollEnd);
+      if (scrollTimer) clearTimeout(scrollTimer);
     };
   }, []);
   
@@ -98,7 +154,7 @@ export function MobileNavigation({ onAddClick }: MobileNavigationProps) {
       transition: {
         duration: 1.5,
         repeat: Infinity,
-        repeatType: "mirror"
+        repeatType: "mirror" as const
       }
     }
   };
@@ -111,7 +167,7 @@ export function MobileNavigation({ onAddClick }: MobileNavigationProps) {
       transition: {
         duration: 2,
         repeat: Infinity,
-        repeatType: "mirror",
+        repeatType: "mirror" as const,
         ease: "easeInOut"
       }
     },

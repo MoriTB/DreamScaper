@@ -27,48 +27,61 @@ export function Header({
   const lastScrollY = useRef(0);
   const ticking = useRef(false);
   
-  // Add smooth scroll listener with debouncing and direction detection
+  // Add smooth scroll listener with optimized behavior
   useEffect(() => {
+    let lastScrollY = window.scrollY;
+    let scrollTimer: number | null = null;
+    
     const handleScroll = () => {
-      if (!ticking.current) {
-        window.requestAnimationFrame(() => {
-          const currentScrollY = window.scrollY;
-          
-          // Determine if we've scrolled enough to change state
-          const isScrolled = currentScrollY > 10;
-          
-          // Determine scroll direction
-          if (currentScrollY > lastScrollY.current + 20) {
-            setScrollDirection('down');
-            
-            // Only hide the header when scrolling down and past the threshold
-            if (currentScrollY > 180) {
-              setHidden(true);
-            }
-          } else if (currentScrollY < lastScrollY.current - 20) {
-            setScrollDirection('up');
-            setHidden(false);
-          }
-          
-          // Update state
-          if (isScrolled !== scrolled) {
-            setScrolled(isScrolled);
-          }
-          
-          lastScrollY.current = currentScrollY;
-          ticking.current = false;
-        });
-        
-        ticking.current = true;
+      const currentScrollY = window.scrollY;
+      
+      // Always show header at the top of the page, regardless of scroll direction
+      if (currentScrollY < 50) {
+        setHidden(false);
+        setScrolled(false);
+        return;
       }
+      
+      // Set scrolled state (for shadow/background opacity)
+      if ((currentScrollY > 10) !== scrolled) {
+        setScrolled(currentScrollY > 10);
+      }
+      
+      // Real-time direction detection with small threshold to prevent jumpiness
+      const delta = currentScrollY - lastScrollY;
+      if (Math.abs(delta) < 8) return; // Ignore very small movements
+      
+      // Update direction state
+      const newDirection = delta > 0 ? 'down' : 'up';
+      if (newDirection !== scrollDirection) {
+        setScrollDirection(newDirection);
+      }
+      
+      // When scrolling down, hide after a short delay
+      if (newDirection === 'down' && currentScrollY > 120) {
+        if (scrollTimer) clearTimeout(scrollTimer);
+        scrollTimer = window.setTimeout(() => {
+          setHidden(true);
+        }, 200);
+      } 
+      // When scrolling up, show immediately for responsive feel
+      else if (newDirection === 'up') {
+        if (scrollTimer) clearTimeout(scrollTimer);
+        setHidden(false);
+      }
+      
+      // Update last position
+      lastScrollY = currentScrollY;
     };
     
+    // Use both scroll and touch events for complete coverage
     window.addEventListener('scroll', handleScroll, { passive: true });
     
     return () => {
       window.removeEventListener('scroll', handleScroll);
+      if (scrollTimer) clearTimeout(scrollTimer);
     };
-  }, [scrolled]);
+  }, [scrolled, scrollDirection]);
 
   // Spring animation variants
   const navVariants = {
